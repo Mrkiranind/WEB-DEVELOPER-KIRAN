@@ -104,4 +104,37 @@ export default function ServicesPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
               How I <span className="text-blue-500">Work</span>
             </h2>
-            <
+            <p className="text-gray-400 text-center mb-16 max-w-xl mx-auto">
+              Simple, transparent process — start se end tak
+            </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {process.map((p, i) => (
+                <div key={i} className="relative">
+                  <div className="text-6xl font-bold text-blue-500/20 mb-4">{p.num}</div>
+                  <h3 className="text-xl font-semibold mb-2">{p.title}</h3>
+                  <p className="text-gray-400 text-sm leading-relaxed">{p.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 py-20 border-t border-gray-900">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl p-10 md:p-16 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start?</h2>
+            <p className="text-gray-300 mb-8 max-w-xl mx-auto">
+              Apne project ke baare mein baat karein. Free consultation ke saath.
+            </p>
+            <Link
+              href="/contact"
+              className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-8 py-3.5 rounded-lg font-semibold transition shadow-lg shadow-blue-500/30"
+            >
+              Get Free Quote
+            </Link>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  );
+}
