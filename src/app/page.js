@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BuyButton from "@/components/BuyButton";
 import { getFeaturedTemplates } from "@/lib/database";
 
-export const revalidate = 60; // हर 60 सेकंड में refresh होगा
+export const revalidate = 60;
 
 export default async function Home() {
   const templates = await getFeaturedTemplates();
@@ -15,7 +16,6 @@ export default async function Home() {
     { icon: "📱", title: "Fully Responsive", desc: "Mobile, tablet aur desktop — sab kuch perfect." },
   ];
 
-  // Fallback अगर database से data न आए
   const fallbackTemplates = [
     { id: 1, name: "SaaS Landing Page", price: 999, tech_stack: "Next.js + Tailwind" },
     { id: 2, name: "E-commerce Store", price: 1999, tech_stack: "Next.js + Stripe" },
@@ -23,7 +23,6 @@ export default async function Home() {
   ];
 
   const displayTemplates = templates.length > 0 ? templates : fallbackTemplates;
-
   const colors = [
     "from-blue-500 to-cyan-500",
     "from-purple-500 to-pink-500",
@@ -97,17 +96,28 @@ export default async function Home() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {displayTemplates.map((t, i) => (
-                <Link key={t.id} href={`/templates/${t.id}`} className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group block">
-                  <div className={`h-44 bg-gradient-to-br ${colors[i % 3]} opacity-80 group-hover:opacity-100 transition`}></div>
+                <div
+                  key={t.id}
+                  className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group"
+                >
+                  <Link href={`/templates/${t.id}`}>
+                    <div className={`h-44 bg-gradient-to-br ${colors[i % 3]} opacity-80 group-hover:opacity-100 transition`}></div>
+                  </Link>
                   <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{t.name}</h3>
-                    <p className="text-sm text-gray-400 mb-4">{t.tech_stack || "Next.js + Tailwind"}</p>
+                    <Link href={`/templates/${t.id}`}>
+                      <h3 className="text-xl font-semibold mb-2">{t.name}</h3>
+                      <p className="text-sm text-gray-400 mb-4">{t.tech_stack || "Next.js + Tailwind"}</p>
+                    </Link>
                     <div className="flex justify-between items-center">
                       <span className="text-2xl font-bold text-blue-400">₹{t.price}</span>
-                      <span className="bg-gradient-to-r from-blue-600 to-cyan-600 px-4 py-2 rounded-lg text-sm font-medium">Buy Now</span>
+                      <BuyButton
+                        templateId={t.id}
+                        templateName={t.name}
+                        amount={t.price}
+                      />
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>
