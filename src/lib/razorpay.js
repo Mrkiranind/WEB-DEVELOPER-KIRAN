@@ -1,7 +1,6 @@
 // Razorpay checkout script dynamically load करो
 export function loadRazorpayScript() {
   return new Promise((resolve) => {
-    // अगर पहले से loaded है
     if (typeof window !== "undefined" && window.Razorpay) {
       resolve(true);
       return;
@@ -20,10 +19,10 @@ export async function initiatePayment({
   templateId,
   templateName,
   amount,
+  customer,
   onSuccess,
   onFailure,
 }) {
-  // Script load करो
   const loaded = await loadRazorpayScript();
   if (!loaded) {
     onFailure("Razorpay SDK load नहीं हुआ");
@@ -31,7 +30,7 @@ export async function initiatePayment({
   }
 
   try {
-    // Order create करो (backend से)
+    // Order create करो
     const orderResponse = await fetch("/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -45,7 +44,7 @@ export async function initiatePayment({
       return;
     }
 
-    // Razorpay checkout खोलो
+    // Razorpay checkout options
     const options = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: orderData.amount,
@@ -56,8 +55,13 @@ export async function initiatePayment({
       theme: {
         color: "#3b82f6",
       },
+      prefill: {
+        name: customer?.name || "",
+        email: customer?.email || "",
+        contact: customer?.phone || "",
+      },
       handler: async function (response) {
-        // Payment success — verify करो
+        // Payment success — verify करो और order save करो
         const verifyResponse = await fetch("/api/razorpay/verify-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -66,6 +70,11 @@ export async function initiatePayment({
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
             templateId,
+            templateName,
+            amount,
+            customerName: customer?.name || "Guest",
+            customerEmail: customer?.email || null,
+            customerPhone: customer?.phone || null,
           }),
         });
 
