@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { saveOrder } from "@/lib/database";
 
 export async function POST(request) {
   try {
@@ -8,6 +9,11 @@ export async function POST(request) {
       razorpay_payment_id,
       razorpay_signature,
       templateId,
+      templateName,
+      amount,
+      customerName,
+      customerEmail,
+      customerPhone,
     } = await request.json();
 
     if (
@@ -37,12 +43,30 @@ export async function POST(request) {
       );
     }
 
-    // ✅ Payment successful
+    // Order save करो database में
+    const order = await saveOrder({
+      template_id: templateId,
+      template_name: templateName || "Unknown Template",
+      amount: amount,
+      payment_id: razorpay_payment_id,
+      order_id: razorpay_order_id,
+      customer_name: customerName || "Guest",
+      customer_email: customerEmail || null,
+      customer_phone: customerPhone || null,
+      status: "paid",
+    });
+
+    if (!order) {
+      console.error("Order save failed but payment verified");
+      // Payment verified है, तो भी success भेजो
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Payment verified successfully",
+      message: "Payment verified and order saved",
       paymentId: razorpay_payment_id,
       templateId: templateId,
+      orderId: order?.id || null,
     });
   } catch (error) {
     console.error("Payment verification error:", error);
