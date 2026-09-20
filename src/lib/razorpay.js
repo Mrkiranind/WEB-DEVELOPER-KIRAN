@@ -30,7 +30,6 @@ export async function initiatePayment({
   }
 
   try {
-    // Order create करो
     const orderResponse = await fetch("/api/razorpay/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,7 +43,6 @@ export async function initiatePayment({
       return;
     }
 
-    // Razorpay checkout options
     const options = {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: orderData.amount,
@@ -52,16 +50,13 @@ export async function initiatePayment({
       name: "Web Developer Kiran",
       description: `Purchase: ${templateName}`,
       order_id: orderData.orderId,
-      theme: {
-        color: "#3b82f6",
-      },
+      theme: { color: "#3b82f6" },
       prefill: {
         name: customer?.name || "",
         email: customer?.email || "",
         contact: customer?.phone || "",
       },
       handler: async function (response) {
-        // Payment success — verify करो और order save करो
         const verifyResponse = await fetch("/api/razorpay/verify-payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
