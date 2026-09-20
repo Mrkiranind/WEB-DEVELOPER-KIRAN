@@ -58,7 +58,6 @@ export async function POST(request) {
 
     if (!order) {
       console.error("Order save failed but payment verified");
-      // Payment verified है, तो भी success भेजो
     }
 
     return NextResponse.json({
