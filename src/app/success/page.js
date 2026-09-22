@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -5,6 +8,40 @@ import Footer from "@/components/Footer";
 export default function SuccessPage({ searchParams }) {
   const paymentId = searchParams.payment_id || "N/A";
   const templateId = searchParams.template_id || "";
+
+  const [downloadInfo, setDownloadInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!paymentId || !templateId) {
+      setLoading(false);
+      return;
+    }
+
+    fetch(`/api/download?payment_id=${paymentId}&template_id=${templateId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setDownloadInfo(data);
+        } else {
+          setError(data.error || "Download info नहीं मिली");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Download fetch नहीं हुआ");
+      })
+      .finally(() => setLoading(false));
+  }, [paymentId, templateId]);
+
+  const handleDownload = () => {
+    if (downloadInfo?.file_url) {
+      window.open(downloadInfo.file_url, "_blank");
+    } else {
+      alert("Download link अभी उपलब्ध नहीं है। कृपया support से संपर्क करें।");
+    }
+  };
 
   return (
     <>
@@ -20,24 +57,57 @@ export default function SuccessPage({ searchParams }) {
           </h1>
 
           <p className="text-gray-400 text-lg mb-8">
-            Aapka payment safal ho gaya. Template ka download link aapko email
-            par bheja jayega.
+            Aapka payment safal ho gaya. Dhanyavaad!
           </p>
 
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8 text-left">
             <div className="flex justify-between mb-3">
               <span className="text-gray-400">Payment ID:</span>
-              <span className="font-mono text-sm text-blue-400">{paymentId}</span>
+              <span className="font-mono text-sm text-blue-400 break-all">
+                {paymentId}
+              </span>
             </div>
             {templateId && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Template ID:</span>
+                <span className="text-gray-400">Template:</span>
                 <span className="font-mono text-sm text-blue-400">
                   #{templateId}
                 </span>
               </div>
             )}
           </div>
+
+          {/* Download Section */}
+          {loading && (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
+              <p className="text-gray-400">Download link prepare हो रहा है...</p>
+            </div>
+          )}
+
+          {!loading && downloadInfo && (
+            <div className="bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-2xl p-6 mb-8">
+              <h2 className="text-xl font-bold mb-3">
+                🎁 Your Template is Ready!
+              </h2>
+              <p className="text-gray-300 mb-4">
+                {downloadInfo.template_name}
+              </p>
+              <button
+                onClick={handleDownload}
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 py-3.5 rounded-lg font-semibold transition shadow-lg shadow-blue-500/30"
+              >
+                ⬇ Download Template
+              </button>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 mb-8">
+              <p className="text-red-400 text-sm">
+                {error}. कृपया support से संपर्क करें।
+              </p>
+            </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
