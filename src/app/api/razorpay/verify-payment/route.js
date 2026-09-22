@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { saveOrder } from "@/lib/database";
+import { sendPurchaseEmail } from "@/lib/email";
 
 export async function POST(request) {
   try {
@@ -16,34 +17,27 @@ export async function POST(request) {
       customerPhone,
     } = await request.json();
 
-    if (
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature
-    ) {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return NextResponse.json(
         { error: "Missing payment details" },
         { status: 400 }
       );
     }
 
-    // Signature verify करो
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest("hex");
 
-    const isAuthentic = expectedSignature === razorpay_signature;
-
-    if (!isAuthentic) {
+    if (expectedSignature !== razorpay_signature) {
       return NextResponse.json(
         { error: "Invalid signature" },
         { status: 400 }
       );
     }
 
-    // Order save करो database में
+    // Order save करो
     const order = await saveOrder({
       template_id: templateId,
       template_name: templateName || "Unknown Template",
@@ -56,13 +50,26 @@ export async function POST(request) {
       status: "paid",
     });
 
-    if (!order) {
-      console.error("Order save failed but payment verified");
+    // Email भेजो (अगर customer email है)
+    if (customerEmail) {
+      try {
+        await sendPurchaseEmail({
+          to: customerEmail,
+          customerName: customerName || "Customer",
+          templateName: templateName || "Template",
+          amount: amount,
+          paymentId: razorpay_payment_id,
+          templateId: templateId,
+        });
+      } catch (emailError) {
+        console.error("Email send failed:", emailError);
+        // Email fail होने पर भी payment success है
+      }
     }
 
     return NextResponse.json({
       success: true,
-      message: "Payment verified and order saved",
+      message: "Payment verified, order saved, email sent",
       paymentId: razorpay_payment_id,
       templateId: templateId,
       orderId: order?.id || null,
