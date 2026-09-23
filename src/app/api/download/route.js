@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { getOrderByPaymentId, getTemplateById } from "@/lib/database";
 
+// इस route को dynamic बनाओ (static नहीं)
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -23,8 +27,8 @@ export async function GET(request) {
       );
     }
 
-    // Template details लाओ
-    const template = await getTemplateById(parseInt(templateId));
+    // Template details लाओ (id convert होगा अंदर)
+    const template = await getTemplateById(templateId);
     if (!template) {
       return NextResponse.json(
         { error: "Template not found" },
@@ -32,7 +36,6 @@ export async function GET(request) {
       );
     }
 
-    // Return download URL
     return NextResponse.json({
       success: true,
       template_name: template.name,
