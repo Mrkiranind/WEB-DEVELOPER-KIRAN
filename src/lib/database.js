@@ -1,7 +1,6 @@
 import { supabase } from "./supabase";
 import { createClient } from "@supabase/supabase-js";
 
-// Service role client — backend operations के लिए (RLS bypass करने के लिए)
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -21,12 +20,18 @@ export async function getAllTemplates() {
   return data;
 }
 
-// एक specific template लाओ
+// एक specific template लाओ (id convert करके)
 export async function getTemplateById(id) {
-  const { data, error } = await supabase
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId)) {
+    console.error("Invalid template ID:", id);
+    return null;
+  }
+
+  const { data, error } = await supabaseAdmin
     .from("templates")
     .select("*")
-    .eq("id", id)
+    .eq("id", numericId)
     .single();
 
   if (error) {
@@ -51,7 +56,7 @@ export async function getFeaturedTemplates() {
   return data;
 }
 
-// Order save करो (payment success के बाद)
+// Order save करो
 export async function saveOrder(orderData) {
   const { data, error } = await supabaseAdmin
     .from("orders")
