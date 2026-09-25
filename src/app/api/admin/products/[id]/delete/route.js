@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +9,26 @@ const supabaseAdmin = createClient(
 );
 
 export async function POST(request, { params }) {
-  const id = parseInt(params.id, 10);
+  try {
+    const id = parseInt(params.id, 10);
 
-  await supabaseAdmin.from("templates").delete().eq("id", id);
+    const { error } = await supabaseAdmin
+      .from("templates")
+      .delete()
+      .eq("id", id);
 
-  redirect("/admin");
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
+  }
 }
