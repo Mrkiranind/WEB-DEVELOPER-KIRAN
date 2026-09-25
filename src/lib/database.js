@@ -6,7 +6,9 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// सारे templates लाओ
+// ===== PUBLIC FUNCTIONS (website के लिए) =====
+
+// सारे templates लाओ (public — homepage, templates page)
 export async function getAllTemplates() {
   const { data, error } = await supabase
     .from("templates")
@@ -20,11 +22,10 @@ export async function getAllTemplates() {
   return data;
 }
 
-// एक specific template लाओ (id convert करके)
+// एक specific template लाओ
 export async function getTemplateById(id) {
   const numericId = parseInt(id, 10);
   if (isNaN(numericId)) {
-    console.error("Invalid template ID:", id);
     return null;
   }
 
@@ -41,7 +42,7 @@ export async function getTemplateById(id) {
   return data;
 }
 
-// Featured templates लाओ
+// Featured templates (homepage के लिए)
 export async function getFeaturedTemplates() {
   const { data, error } = await supabase
     .from("templates")
@@ -55,6 +56,24 @@ export async function getFeaturedTemplates() {
   }
   return data;
 }
+
+// ===== ADMIN FUNCTIONS =====
+
+// Admin dashboard के लिए — सारे templates (RLS bypass)
+export async function getAllTemplatesAdmin() {
+  const { data, error } = await supabaseAdmin
+    .from("templates")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching templates (admin):", error);
+    return [];
+  }
+  return data;
+}
+
+// ===== ORDER FUNCTIONS =====
 
 // Order save करो
 export async function saveOrder(orderData) {
@@ -86,7 +105,7 @@ export async function getOrderByPaymentId(paymentId) {
   return data;
 }
 
-// Customer के सारे orders लाओ
+// Customer के सारे orders
 export async function getOrdersByEmail(email) {
   const { data, error } = await supabaseAdmin
     .from("orders")
