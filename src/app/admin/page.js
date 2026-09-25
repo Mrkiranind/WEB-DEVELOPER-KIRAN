@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
-import { getAllTemplates } from "@/lib/database";
+import { getAllTemplatesAdmin } from "@/lib/database";
+import DeleteButton from "@/components/DeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export default async function AdminDashboard() {
     redirect("/admin/login");
   }
 
-  const templates = await getAllTemplates();
+  const templates = await getAllTemplatesAdmin();
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
@@ -52,6 +53,13 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
+                {templates.length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="px-4 py-10 text-center text-gray-500">
+                      No products yet. Click "+ Add New Product" to start.
+                    </td>
+                  </tr>
+                )}
                 {templates.map((t) => (
                   <tr
                     key={t.id}
@@ -69,7 +77,7 @@ export default async function AdminDashboard() {
                       {t.featured ? "⭐ Yes" : "No"}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <Link
                           href={`/admin/products/${t.id}/edit`}
                           className="text-blue-400 hover:text-blue-300 text-sm"
@@ -87,22 +95,5 @@ export default async function AdminDashboard() {
         </div>
       </div>
     </main>
-  );
-}
-
-// Delete Button Client Component
-function DeleteButton({ id }) {
-  return (
-    <form action={`/api/admin/products/${id}/delete`} method="POST">
-      <button
-        type="submit"
-        className="text-red-400 hover:text-red-300 text-sm"
-        onClick={(e) => {
-          if (!confirm("Delete करना है?")) e.preventDefault();
-        }}
-      >
-        Delete
-      </button>
-    </form>
   );
 }
