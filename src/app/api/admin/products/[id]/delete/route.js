@@ -12,6 +12,30 @@ export async function POST(request, { params }) {
   try {
     const id = parseInt(params.id, 10);
 
+    // पहले check करो कि orders linked हैं या नहीं
+    const { data: linkedOrders, error: checkError } = await supabaseAdmin
+      .from("orders")
+      .select("id")
+      .eq("template_id", id);
+
+    if (checkError) {
+      console.error("Error checking orders:", checkError);
+    }
+
+    if (linkedOrders && linkedOrders.length > 0) {
+      // Orders linked हैं — safe delete
+      // पहले orders को null करो template_id
+      const { error: updateError } = await supabaseAdmin
+        .from("orders")
+        .update({ template_id: null })
+        .eq("template_id", id);
+
+      if (updateError) {
+        console.error("Error unlinking orders:", updateError);
+      }
+    }
+
+    // अब template delete करो
     const { error } = await supabaseAdmin
       .from("templates")
       .delete()
