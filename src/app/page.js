@@ -1,13 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BuyButton from "@/components/BuyButton";
-import { getFeaturedTemplates } from "@/lib/database";
 
-export const revalidate = 60;
+export default function Home() {
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function Home() {
-  const templates = await getFeaturedTemplates();
+  useEffect(() => {
+    fetch("/api/templates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // सिर्फ featured templates दिखाओ
+          const featured = data.templates.filter((t) => t.featured);
+          setTemplates(featured.length > 0 ? featured : data.templates.slice(0, 3));
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const features = [
     { icon: "⚡", title: "Lightning Fast", desc: "Next.js 14 aur Vercel CDN se aapki site har jagah instant load hogi." },
@@ -16,13 +31,6 @@ export default async function Home() {
     { icon: "📱", title: "Fully Responsive", desc: "Mobile, tablet aur desktop — sab kuch perfect." },
   ];
 
-  const fallbackTemplates = [
-    { id: 1, name: "SaaS Landing Page", price: 999, tech_stack: "Next.js + Tailwind" },
-    { id: 2, name: "E-commerce Store", price: 1999, tech_stack: "Next.js + Stripe" },
-    { id: 3, name: "Portfolio Website", price: 499, tech_stack: "Next.js + Framer" },
-  ];
-
-  const displayTemplates = templates.length > 0 ? templates : fallbackTemplates;
   const colors = [
     "from-blue-500 to-cyan-500",
     "from-purple-500 to-pink-500",
@@ -94,32 +102,35 @@ export default async function Home() {
                 View All →
               </Link>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {displayTemplates.map((t, i) => (
-                <div
-                  key={t.id}
-                  className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group"
-                >
-                  <Link href={`/templates/${t.id}`}>
-                    <div className={`h-44 bg-gradient-to-br ${colors[i % 3]} opacity-80 group-hover:opacity-100 transition`}></div>
-                  </Link>
-                  <div className="p-6">
+
+            {loading && (
+              <p className="text-center text-gray-400 py-10">Loading templates...</p>
+            )}
+
+            {!loading && (
+              <div className="grid md:grid-cols-3 gap-6">
+                {templates.map((t, i) => (
+                  <div
+                    key={t.id}
+                    className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group"
+                  >
                     <Link href={`/templates/${t.id}`}>
-                      <h3 className="text-xl font-semibold mb-2">{t.name}</h3>
-                      <p className="text-sm text-gray-400 mb-4">{t.tech_stack || "Next.js + Tailwind"}</p>
+                      <div className={`h-44 bg-gradient-to-br ${colors[i % 3]} opacity-80 group-hover:opacity-100 transition`}></div>
                     </Link>
-                    <div className="flex justify-between items-center">
-                      <span className="text-2xl font-bold text-blue-400">₹{t.price}</span>
-                      <BuyButton
-                        templateId={t.id}
-                        templateName={t.name}
-                        amount={t.price}
-                      />
+                    <div className="p-6">
+                      <Link href={`/templates/${t.id}`}>
+                        <h3 className="text-xl font-semibold mb-2">{t.name}</h3>
+                        <p className="text-sm text-gray-400 mb-4">{t.tech_stack || "Next.js + Tailwind"}</p>
+                      </Link>
+                      <div className="flex justify-between items-center">
+                        <span className="text-2xl font-bold text-blue-400">₹{t.price}</span>
+                        <BuyButton templateId={t.id} templateName={t.name} amount={t.price} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
