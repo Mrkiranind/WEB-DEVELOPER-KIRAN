@@ -8,10 +8,10 @@ export async function sendPurchaseEmail({
   templateName,
   amount,
   paymentId,
-  templateId,
+  downloadToken,
 }) {
   try {
-    const downloadUrl = `https://webdeveloperkiran.in/success?payment_id=${paymentId}&template_id=${templateId}`;
+    const downloadUrl = `https://webdeveloperkiran.in/download/${downloadToken}`;
 
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
@@ -25,9 +25,10 @@ export async function sendPurchaseEmail({
           </head>
           <body style="font-family: Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 20px;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #111827; border-radius: 12px; padding: 40px; color: #ffffff;">
+              
               <div style="text-align: center; margin-bottom: 30px;">
                 <div style="display: inline-block; width: 60px; height: 60px; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 12px; line-height: 60px; font-size: 28px; font-weight: bold;">K</div>
-                <h1 style="color: #ffffff; margin-top: 15px; font-size: 24px;">Web Developer Kiran</h1>
+                <h1 style="color: #ffffff; margin-top: 15px; font-size: 20px;">Web Developer Kiran</h1>
               </div>
 
               <div style="text-align: center; margin-bottom: 30px;">
@@ -56,10 +57,18 @@ export async function sendPurchaseEmail({
               </div>
 
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${downloadUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #06b6d4); color: #ffffff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">⬇ Download Your Template</a>
+                <a href="${downloadUrl}" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #06b6d4); color: #ffffff; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">⬇ Download Your Template</a>
               </div>
 
-              <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">Agar aapko koi problem ho, to humein reply karein ya hello@webdeveloperkiran.com par email karein.</p>
+              <div style="background-color: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; padding: 15px; margin: 25px 0; border-radius: 6px;">
+                <p style="color: #93c5fd; font-size: 14px; margin: 0; line-height: 1.6;">
+                  <strong>🔒 Important:</strong> Ye download link personal hai. 
+                  <strong>Maximum 3 baar</strong> download ho sakta hai, aur <strong>7 din</strong> baad expire ho jayega. 
+                  Kripya is link ko kisi ke saath share na karein.
+                </p>
+              </div>
+
+              <p style="color: #6b7280; font-size: 14px; line-height: 1.6;">Agar aapko koi problem ho, to humein reply karein ya <a href="mailto:hello@webdeveloperkiran.com" style="color: #3b82f6;">hello@webdeveloperkiran.com</a> par email karein.</p>
 
               <hr style="border: none; border-top: 1px solid #374151; margin: 30px 0;">
               <p style="color: #6b7280; font-size: 12px; text-align: center;">© 2026 Web Developer Kiran. All rights reserved.</p>
