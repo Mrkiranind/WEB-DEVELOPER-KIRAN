@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { saveOrder } from "@/lib/database";
+import {
+  saveOrder,
+  createDownloadToken,
+} from "@/lib/database";
 import { sendPurchaseEmail } from "@/lib/email";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
@@ -24,6 +29,7 @@ export async function POST(request) {
       );
     }
 
+    // Signature verify
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -50,8 +56,20 @@ export async function POST(request) {
       status: "paid",
     });
 
-    // Email भेजो (अगर customer email है)
-    if (customerEmail) {
+    // Download token बनाओ
+    let downloadToken = null;
+    if (order && customerEmail) {
+      const tokenData = await createDownloadToken({
+        orderId: order.id,
+        templateId: templateId,
+        paymentId: razorpay_payment_id,
+        customerEmail: customerEmail,
+      });
+      downloadToken = tokenData?.token || null;
+    }
+
+    // Email भेजो
+    if (customerEmail && downloadToken) {
       try {
         await sendPurchaseEmail({
           to: customerEmail,
@@ -59,11 +77,10 @@ export async function POST(request) {
           templateName: templateName || "Template",
           amount: amount,
           paymentId: razorpay_payment_id,
-          templateId: templateId,
+          downloadToken: downloadToken,
         });
       } catch (emailError) {
         console.error("Email send failed:", emailError);
-        // Email fail होने पर भी payment success है
       }
     }
 
