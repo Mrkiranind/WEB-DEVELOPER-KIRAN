@@ -55,9 +55,13 @@ export default async function AdminDashboard() {
               <tbody>
                 {templates.length === 0 && (
                   <tr>
-                    <td colSpan="6" className="px-4 py-10 text-center text-gray-500">
-                      No products yet. Click "+ Add New Product" to start.
-                    </td>
+                    <td colSpan="6" className="px-4 py-16 text-center">
+  <div className="text-4xl mb-3">📦</div>
+  <p className="text-gray-400 mb-1">अभी कोई product नहीं है</p>
+  <p className="text-gray-500 text-sm">
+    "+ Add New Product" दबाकर पहला product बनाओ
+  </p>
+</td>
                   </tr>
                 )}
                 {templates.map((t) => (
