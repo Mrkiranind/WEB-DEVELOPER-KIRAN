@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useUser, signOut } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, loading } = useUser();
+  const router = useRouter();
 
   const navLinks = [
     { name: "Home", href: "/" },
@@ -13,6 +17,12 @@ export default function Navbar() {
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
+
+  const handleLogout = async () => {
+    await signOut();
+    router.push("/");
+    setMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-800">
@@ -45,18 +55,42 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/contact"
-            className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-500/30"
-          >
-            Hire Me
-          </Link>
+          {!loading && user ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-sm text-gray-300 hover:text-blue-400 transition"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="border border-gray-700 hover:border-red-500 hover:text-red-400 px-4 py-2 rounded-lg text-sm transition"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm text-gray-300 hover:text-blue-400 transition"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition shadow-lg shadow-blue-500/30"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden text-white text-2xl"
-          aria-label="Toggle menu"
         >
           {menuOpen ? "✕" : "☰"}
         </button>
@@ -75,16 +109,44 @@ export default function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-3 rounded-lg text-sm font-semibold text-center mt-2"
-            >
-              Hire Me
-            </Link>
+
+            {!loading && user ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-gray-300 hover:text-blue-400 transition py-2 border-b border-gray-900"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-left border border-gray-700 px-5 py-3 rounded-lg text-sm"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-gray-300 hover:text-blue-400 transition py-2 border-b border-gray-900"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 px-5 py-3 rounded-lg text-sm font-semibold text-center"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
     </header>
   );
-                  }
+}
