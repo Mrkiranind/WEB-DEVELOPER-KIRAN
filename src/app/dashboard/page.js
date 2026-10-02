@@ -11,7 +11,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, loading: userLoading } = useUser();
   const [orders, setOrders] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -20,10 +22,17 @@ export default function DashboardPage() {
     }
 
     if (user?.email) {
-      fetch(`/api/user/orders?email=${encodeURIComponent(user.email)}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success) setOrders(data.orders);
+      Promise.all([
+        fetch(`/api/user/orders?email=${encodeURIComponent(user.email)}`).then(
+          (res) => res.json()
+        ),
+        fetch(
+          `/api/user/subscriptions?email=${encodeURIComponent(user.email)}`
+        ).then((res) => res.json()),
+      ])
+        .then(([ordersData, subsData]) => {
+          if (ordersData.success) setOrders(ordersData.orders);
+          if (subsData.success) setSubscriptions(subsData.subscriptions);
         })
         .catch((err) => console.error(err))
         .finally(() => setLoading(false));
@@ -33,6 +42,41 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     await signOut();
     router.push("/");
+  };
+
+  const handleCancelSubscription = async (subscriptionId) => {
+    if (
+      !confirm(
+        "क्या आप इस subscription को cancel करना चाहते हो? Current month तक service मिलेगी।"
+      )
+    ) {
+      return;
+    }
+
+    setCancelling(subscriptionId);
+
+    const res = await fetch("/api/subscription/cancel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscriptionId }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // State update करो
+      setSubscriptions((prev) =>
+        prev.map((sub) =>
+          sub.razorpay_subscription_id === subscriptionId
+            ? { ...sub, status: "cancelled" }
+            : sub
+        )
+      );
+    } else {
+      alert("Cancel failed: " + (data.error || "Unknown error"));
+    }
+
+    setCancelling(null);
   };
 
   if (userLoading || !user) {
@@ -47,11 +91,15 @@ export default function DashboardPage() {
     );
   }
 
+  const activeSubs = subscriptions.filter((s) => s.status === "active");
+  const otherSubs = subscriptions.filter((s) => s.status !== "active");
+
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-black text-white px-6 py-16">
         <div className="max-w-5xl mx-auto">
+          {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">
@@ -68,14 +116,130 @@ export default function DashboardPage() {
             </button>
           </div>
 
+          {/* Active Subscriptions */}
+          {activeSubs.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-bold mb-6">
+                Active{" "}
+                <span className="text-blue-500">Subscriptions</span>
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {activeSubs.map((sub) => (
+                  <div
+                    key={sub.id}
+                    className="bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 rounded-xl p-5"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-semibold">
+                        {sub.plan_name} Plan
+                      </h3>
+                      <span className="text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded">
+                        ACTIVE
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-blue-400 mb-4">
+                      ₹{sub.amount}
+                      <span className="text-sm text-gray-400">/month</span>
+                    </p>
+                    <div className="space-y-2 text-sm text-gray-400 mb-5">
+                      <p>
+                        Subscription ID:{" "}
+                        <span className="font-mono text-xs text-gray-500">
+                          {sub.razorpay_subscription_id}
+                        </span>
+                      </p>
+                      {sub.start_at && (
+                        <p>
+                          Started:{" "}
+                          {new Date(sub.start_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </p>
+                      )}
+                      {sub.created_at && (
+                        <p>
+                          Subscribed:{" "}
+                          {new Date(sub.created_at).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <a
+                        href="https://dashboard.razorpay.com/app/subscriptions"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 text-center border border-gray-700 hover:border-blue-500 py-2 rounded-lg text-sm transition"
+                      >
+                        View in Razorpay
+                      </a>
+                      <button
+                        onClick={() =>
+                          handleCancelSubscription(
+                            sub.razorpay_subscription_id
+                          )
+                        }
+                        disabled={
+                          cancelling === sub.razorpay_subscription_id
+                        }
+                        className="flex-1 border border-gray-700 hover:border-red-500 hover:text-red-400 py-2 rounded-lg text-sm transition disabled:opacity-50"
+                      >
+                        {cancelling === sub.razorpay_subscription_id
+                          ? "Cancelling..."
+                          : "Cancel"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Other/Cancelled Subscriptions */}
+          {otherSubs.length > 0 && (
+            <div className="mb-10">
+              <h2 className="text-2xl font-bold mb-6">
+                Subscription{" "}
+                <span className="text-gray-500">History</span>
+              </h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {otherSubs.map((sub) => (
+                  <div
+                    key={sub.id}
+                    className="bg-gray-900 border border-gray-800 rounded-xl p-5 opacity-75"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-lg font-semibold">
+                        {sub.plan_name} Plan
+                      </h3>
+                      <span className="text-gray-400 text-xs bg-gray-500/10 px-2 py-1 rounded uppercase">
+                        {sub.status}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-400">
+                      ₹{sub.amount}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* My Purchases */}
           <div className="mb-10">
             <h2 className="text-2xl font-bold mb-6">
               My <span className="text-blue-500">Purchases</span>
             </h2>
 
-            {loading && (
-              <p className="text-gray-400">Loading orders...</p>
-            )}
+            {loading && <p className="text-gray-400">Loading orders...</p>}
 
             {!loading && orders.length === 0 && (
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center">
@@ -127,6 +291,22 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* CTA - Browse Services */}
+          <div className="bg-gradient-to-br from-blue-600/10 to-cyan-600/5 border border-blue-500/20 rounded-2xl p-8 text-center">
+            <h3 className="text-xl font-bold mb-2">
+              Need a website maintenance plan?
+            </h3>
+            <p className="text-gray-400 text-sm mb-5">
+              Monthly plans से अपनी website को updated और secure रखो।
+            </p>
+            <Link
+              href="/services"
+              className="inline-block bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-6 py-3 rounded-lg font-semibold transition"
+            >
+              View Plans →
+            </Link>
           </div>
         </div>
       </main>
