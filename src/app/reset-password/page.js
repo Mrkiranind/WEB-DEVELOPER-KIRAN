@@ -17,27 +17,22 @@ export default function ResetPasswordPage() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // URL में hash check करो (Supabase reset link में #access_token आता है)
     const checkSession = async () => {
       const { data } = await authClient.auth.getSession();
 
       if (data?.session) {
         setHasSession(true);
-      } else {
-        // Hash से session निकालने की कोशिश करो
-        const hash = window.location.hash;
-        if (hash && hash.includes("access_token")) {
-          // Supabase अपने आप session set कर देगा
-          setTimeout(async () => {
-            const { data: newData } = await authClient.auth.getSession();
-            if (newData?.session) setHasSession(true);
-            setChecking(false);
-          }, 1000);
-        } else {
-          setChecking(false);
-        }
+        setChecking(false);
+        return;
       }
-      setChecking(false);
+
+      setTimeout(async () => {
+        const { data: newData } = await authClient.auth.getSession();
+        if (newData?.session) {
+          setHasSession(true);
+        }
+        setChecking(false);
+      }, 2000);
     };
 
     checkSession();
@@ -69,7 +64,7 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setMessage("✅ Password successfully update हो गया! Dashboard पर redirect हो रहे हैं...");
+    setMessage("✅ Password successfully update हो गया!");
     setLoading(false);
 
     setTimeout(() => {
@@ -82,7 +77,10 @@ export default function ResetPasswordPage() {
       <>
         <Navbar />
         <main className="min-h-screen bg-black text-white flex items-center justify-center">
-          <p className="text-gray-400">Verifying reset link...</p>
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400">Verifying reset link...</p>
+          </div>
         </main>
         <Footer />
       </>
