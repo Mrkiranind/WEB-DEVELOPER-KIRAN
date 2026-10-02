@@ -8,7 +8,6 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const authClient = createClient(supabaseUrl, supabaseAnonKey);
 
-// Sign up
 export async function signUp(email, password, fullName) {
   const { data, error } = await authClient.auth.signUp({
     email,
@@ -20,7 +19,6 @@ export async function signUp(email, password, fullName) {
   return { data, error };
 }
 
-// Sign in
 export async function signIn(email, password) {
   const { data, error } = await authClient.auth.signInWithPassword({
     email,
@@ -29,19 +27,17 @@ export async function signIn(email, password) {
   return { data, error };
 }
 
-// Sign out
 export async function signOut() {
   const { error } = await authClient.auth.signOut();
   return { error };
 }
 
-// Current user
 export async function getCurrentUser() {
   const { data, error } = await authClient.auth.getUser();
   return { user: data?.user, error };
 }
 
-// Forgot password — reset email भेजो
+// Reset password email भेजो
 export async function resetPassword(email) {
   const redirectTo = `${window.location.origin}/reset-password`;
   const { data, error } = await authClient.auth.resetPasswordForEmail(email, {
@@ -50,7 +46,7 @@ export async function resetPassword(email) {
   return { data, error };
 }
 
-// Update password — reset के बाद नया password set करो
+// नया password update करो
 export async function updatePassword(newPassword) {
   const { data, error } = await authClient.auth.updateUser({
     password: newPassword,
@@ -58,7 +54,6 @@ export async function updatePassword(newPassword) {
   return { data, error };
 }
 
-// User hook
 export function useUser() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
