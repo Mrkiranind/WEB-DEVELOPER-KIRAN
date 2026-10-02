@@ -41,6 +41,23 @@ export async function getCurrentUser() {
   return { user: data?.user, error };
 }
 
+// Forgot password — reset email भेजो
+export async function resetPassword(email) {
+  const redirectTo = `${window.location.origin}/reset-password`;
+  const { data, error } = await authClient.auth.resetPasswordForEmail(email, {
+    redirectTo,
+  });
+  return { data, error };
+}
+
+// Update password — reset के बाद नया password set करो
+export async function updatePassword(newPassword) {
+  const { data, error } = await authClient.auth.updateUser({
+    password: newPassword,
+  });
+  return { data, error };
+}
+
 // User hook
 export function useUser() {
   const [user, setUser] = useState(null);
