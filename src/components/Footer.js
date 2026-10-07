@@ -9,10 +9,17 @@ export default function Footer() {
     { name: "Contact", href: "/contact" },
   ];
 
+  const legalLinks = [
+    { name: "Terms of Service", href: "/terms" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Refund Policy", href: "/refund" },
+  ];
+
   return (
     <footer className="border-t border-gray-900 bg-black">
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Brand Column */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center font-bold text-lg">
@@ -44,6 +51,7 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Quick Links */}
           <div>
             <h3 className="text-white font-semibold mb-5">Quick Links</h3>
             <ul className="space-y-3 text-sm">
@@ -60,6 +68,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Services */}
           <div>
             <h3 className="text-white font-semibold mb-5">Services</h3>
             <ul className="space-y-3 text-sm text-gray-400">
@@ -81,6 +90,7 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Newsletter */}
           <div>
             <h3 className="text-white font-semibold mb-5">Stay Updated</h3>
             <p className="text-gray-400 text-sm mb-4">
@@ -90,7 +100,7 @@ export default function Footer() {
               <input
                 type="email"
                 placeholder="your@email.com"
-                className="bg-gray-900 border border-gray-800 focus:border-blue-500 outline-none px-4 py-2.5 rounded-lg text-sm transition"
+                className="bg-gray-900 border border-gray-800 focus:border-blue-500 outline-none px-4 py-2.5 rounded-lg text-sm transition text-white"
               />
               <button
                 type="button"
@@ -106,22 +116,26 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Bottom Bar */}
       <div className="border-t border-gray-900">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-gray-500 text-sm">
             © 2026 <span className="text-blue-400">Web Developer Kiran</span>.
             All rights reserved.
           </p>
-          <div className="flex gap-6 text-sm text-gray-500">
-            <Link href="/privacy" className="hover:text-blue-400 transition">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="hover:text-blue-400 transition">
-              Terms of Service
-            </Link>
+          <div className="flex flex-wrap gap-6 text-sm text-gray-500 justify-center">
+            {legalLinks.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="hover:text-blue-400 transition"
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
       </div>
     </footer>
   );
-                }
+}
