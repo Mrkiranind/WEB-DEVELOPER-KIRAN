@@ -39,9 +39,8 @@ export async function getCurrentUser() {
 
 // Reset password email भेजो
 export async function resetPassword(email) {
-  const redirectTo = `${window.location.origin}/reset-password`;
   const { data, error } = await authClient.auth.resetPasswordForEmail(email, {
-    redirectTo,
+    redirectTo: "https://webdeveloperkiran.in/reset-password",
   });
   return { data, error };
 }
