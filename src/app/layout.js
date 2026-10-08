@@ -12,11 +12,14 @@ export const metadata = {
     "Full Stack Development",
     "Website Templates India",
     "React Templates",
+    "Website Design",
+    "Web Development Services",
   ],
   authors: [{ name: "Web Developer Kiran" }],
   creator: "Web Developer Kiran",
   publisher: "Web Developer Kiran",
   metadataBase: new URL("https://webdeveloperkiran.in"),
+
   openGraph: {
     title: "Web Developer Kiran — Premium Templates & Full Stack Development",
     description:
@@ -26,14 +29,20 @@ export const metadata = {
     locale: "en_IN",
     type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
     title: "Web Developer Kiran — Premium Templates & Full Stack Development",
     description:
       "Buy premium website templates and hire full stack development services.",
   },
+
   icons: {
     icon: "/favicon.ico",
+  },
+
+  verification: {
+    google: "K7dEMv2krV-Syajsh3l4wBWXnnPg0WG5X8-LN048GHQ",
   },
 };
 
