@@ -160,17 +160,26 @@ export default function TemplatesPage() {
                         href={`/templates/${t.id}`}
                         className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group block"
                       >
-                        <div
-                          className={`h-52 bg-gradient-to-br ${
-                            colors[i % colors.length]
-                          } opacity-80 group-hover:opacity-100 transition relative`}
-                        >
-                          {t.featured && (
-                            <span className="absolute top-3 right-3 bg-black/70 backdrop-blur text-yellow-400 text-xs font-semibold px-3 py-1 rounded-full">
-                              ⭐ Featured
-                            </span>
-                          )}
-                        </div>
+                       <div className="h-52 relative overflow-hidden">
+  {t.image_url ? (
+    <img
+      src={t.image_url}
+      alt={t.name}
+      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+    />
+  ) : (
+    <div
+      className={`w-full h-full bg-gradient-to-br ${
+        colors[i % colors.length]
+      } opacity-80 group-hover:opacity-100 transition`}
+    ></div>
+  )}
+  {t.featured && (
+    <span className="absolute top-3 right-3 bg-black/70 backdrop-blur text-yellow-400 text-xs font-semibold px-3 py-1 rounded-full z-10">
+      ⭐ Featured
+    </span>
+  )}
+</div>
                         <div className="p-6">
                           <p className="text-xs text-blue-400 font-semibold mb-2">
                             {t.category}
