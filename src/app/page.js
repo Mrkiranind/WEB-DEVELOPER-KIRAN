@@ -187,11 +187,17 @@ export default function Home() {
                       href={`/templates/${t.id}`}
                       className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-blue-500/50 hover:-translate-y-1 transition duration-300 group block"
                     >
-                      <div
-                        className={`h-44 bg-gradient-to-br ${
-                          colors[i % 3]
-                        } opacity-80 group-hover:opacity-100 transition`}
-                      ></div>
+                  <div className="h-44 relative overflow-hidden">
+  {t.image_url ? (
+    <img
+      src={t.image_url}
+      alt={t.name}
+      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+    />
+  ) : (
+    <div className={`w-full h-full bg-gradient-to-br ${colors[i % 3]} opacity-80 group-hover:opacity-100 transition`}></div>
+  )}
+</div>
                       <div className="p-6">
                         <h3 className="text-xl font-semibold mb-2">{t.name}</h3>
                         <p className="text-sm text-gray-400 mb-4">
