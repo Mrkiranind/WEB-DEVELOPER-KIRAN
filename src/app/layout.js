@@ -38,7 +38,9 @@ export const metadata = {
   },
 
   icons: {
-    icon: "/favicon.ico",
+    icon: "https://janpsxugdtkkniuhpygx.supabase.co/storage/v1/object/public/Assets/Icon.png",
+    shortcut: "https://janpsxugdtkkniuhpygx.supabase.co/storage/v1/object/public/Assets/Icon.png",
+    apple: "https://janpsxugdtkkniuhpygx.supabase.co/storage/v1/object/public/Assets/Icon.png",
   },
 
   verification: {
