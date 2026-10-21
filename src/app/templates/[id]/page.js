@@ -105,9 +105,17 @@ export default function TemplateDetail() {
         <section className="px-6 py-16">
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
             <div>
-              <div
-                className={`aspect-video bg-gradient-to-br ${color} rounded-2xl shadow-2xl shadow-blue-500/20`}
-              ></div>
+             <div className="aspect-video relative rounded-2xl overflow-hidden border border-gray-800 bg-gray-900 shadow-2xl shadow-blue-500/20">
+  {template.image_url ? (
+    <img 
+      src={template.image_url} 
+      alt={template.name} 
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className={`w-full h-full bg-gradient-to-br ${color}`}></div>
+  )}
+</div>
             <div className="mt-6 grid grid-cols-3 gap-3">
   {[1, 2, 3].map((i) => {
     // हम इमेज URL बनाते हैं (जैसे ecommerce-1.png, ecommerce-2.png)
