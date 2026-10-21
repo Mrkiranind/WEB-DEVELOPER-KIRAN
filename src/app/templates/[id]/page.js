@@ -146,16 +146,6 @@ export default function TemplateDetail() {
                   className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 py-3.5 rounded-lg font-semibold transition shadow-lg shadow-blue-500/30"
                   label="Buy Now"
                 />
-                                  {template.demo_url && (
-                  <a
-                    href={template.demo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-center w-full mt-3 border border-gray-700 hover:border-blue-500 hover:bg-blue-500/10 py-3.5 rounded-lg font-semibold transition"
-                  >
-                    Live Preview
-                  </a>
-                )}
                 {template.demo_url && (
                   <a
                     href={template.demo_url}
