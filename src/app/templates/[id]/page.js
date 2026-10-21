@@ -108,14 +108,34 @@ export default function TemplateDetail() {
               <div
                 className={`aspect-video bg-gradient-to-br ${color} rounded-2xl shadow-2xl shadow-blue-500/20`}
               ></div>
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`aspect-video bg-gradient-to-br ${color} opacity-50 rounded-lg`}
-                  ></div>
-                ))}
-              </div>
+            <div className="mt-6 grid grid-cols-3 gap-3">
+  {[1, 2, 3].map((i) => {
+    // हम इमेज URL बनाते हैं (जैसे ecommerce-1.png, ecommerce-2.png)
+    const baseUrl = template.image_url ? template.image_url.split('-1.png')[0] : '';
+    const imgUrl = baseUrl ? `${baseUrl}-${i}.png` : null;
+
+    return (
+      <div
+        key={i}
+        className="aspect-video rounded-lg overflow-hidden border border-gray-800 bg-gray-900"
+      >
+        {imgUrl ? (
+          <img
+            src={imgUrl}
+            alt={`Preview ${i}`}
+            className="w-full h-full object-cover hover:scale-110 transition duration-300 cursor-pointer"
+            onClick={() => window.open(imgUrl, "_blank")}
+            onError={(e) => {
+               e.target.style.display = 'none';
+               e.target.nextSibling.style.display = 'block';
+            }}
+          />
+        ) : null}
+        <div className={`w-full h-full bg-gradient-to-br ${color} opacity-50`} style={{ display: imgUrl ? 'none' : 'block' }}></div>
+      </div>
+    );
+  })}
+</div>
             </div>
 
             <div>
