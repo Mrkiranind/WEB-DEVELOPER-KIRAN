@@ -12,6 +12,7 @@ export default function TemplateDetail() {
   const id = params.id;
 
   const [template, setTemplate] = useState(null);
+  const [gallery, setGallery] = useState([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -23,6 +24,27 @@ export default function TemplateDetail() {
       .then((data) => {
         if (data.success && data.template) {
           setTemplate(data.template);
+          
+          // गैलरी इमेजेज बनाओ
+          const images = [];
+          if (data.template.image_url) images.push(data.template.image_url);
+          
+          // डेटाबेस में अगर image_url_2 और image_url_3 हैं तो उन्हें जोड़ो
+          // (हालांकि अभी हम URL के आधार पर बना रहे हैं)
+          const baseUrl = data.template.image_url ? data.template.image_url.split('-1.png')[0] : '';
+          if (baseUrl) {
+             // चूंकि ब्राउज़र को पता नहीं कि -2.png है या नहीं, हम 3 स्लॉट बनाएंगे 
+             // और इमेज लोड होने पर देखेंगे
+             images.push(`${baseUrl}-2.png`);
+             images.push(`${baseUrl}-3.png`);
+          }
+
+          // अगर सिर्फ 1 इमेज है, तो 3 स्लॉट के लिए उसी का इस्तेमाल करो
+          while (images.length < 3) {
+            images.push(data.template.image_url || "");
+          }
+          
+          setGallery(images.slice(0, 3));
         } else {
           setNotFound(true);
         }
@@ -53,10 +75,7 @@ export default function TemplateDetail() {
         <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
           <div className="text-center">
             <h1 className="text-4xl font-bold mb-4">Template Not Found</h1>
-            <Link
-              href="/templates"
-              className="text-blue-400 hover:text-blue-300"
-            >
+            <Link href="/templates" className="text-blue-400 hover:text-blue-300">
               ← Back to Templates
             </Link>
           </div>
@@ -104,48 +123,51 @@ export default function TemplateDetail() {
 
         <section className="px-6 py-16">
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12">
+            {/* Left Side - Images */}
             <div>
-             <div className="aspect-video relative rounded-2xl overflow-hidden border border-gray-800 bg-gray-900 shadow-2xl shadow-blue-500/20">
-  {template.image_url ? (
-    <img 
-      src={template.image_url} 
-      alt={template.name} 
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className={`w-full h-full bg-gradient-to-br ${color}`}></div>
-  )}
-</div>
-            <div className="mt-6 grid grid-cols-3 gap-3">
-  {[1, 2, 3].map((i) => {
-    // हम इमेज URL बनाते हैं (जैसे ecommerce-1.png, ecommerce-2.png)
-    const baseUrl = template.image_url ? template.image_url.split('-1.png')[0] : '';
-    const imgUrl = baseUrl ? `${baseUrl}-${i}.png` : null;
+              {/* Big Main Image */}
+              <div className="aspect-video relative rounded-2xl overflow-hidden border border-gray-800 bg-gray-900 shadow-2xl shadow-blue-500/20">
+                {template.image_url ? (
+                  <img
+                    src={template.image_url}
+                    alt={template.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className={`w-full h-full bg-gradient-to-br ${color}`}></div>
+                )}
+              </div>
 
-    return (
-      <div
-        key={i}
-        className="aspect-video rounded-lg overflow-hidden border border-gray-800 bg-gray-900"
-      >
-        {imgUrl ? (
-          <img
-            src={imgUrl}
-            alt={`Preview ${i}`}
-            className="w-full h-full object-cover hover:scale-110 transition duration-300 cursor-pointer"
-            onClick={() => window.open(imgUrl, "_blank")}
-            onError={(e) => {
-               e.target.style.display = 'none';
-               e.target.nextSibling.style.display = 'block';
-            }}
-          />
-        ) : null}
-        <div className={`w-full h-full bg-gradient-to-br ${color} opacity-50`} style={{ display: imgUrl ? 'none' : 'block' }}></div>
-      </div>
-    );
-  })}
-</div>
+              {/* Thumbnail Gallery */}
+              <div className="mt-6 grid grid-cols-3 gap-3">
+                {gallery.map((img, index) => (
+                  <div
+                    key={index}
+                    className="aspect-video rounded-lg overflow-hidden border border-gray-800 bg-gray-900"
+                  >
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover hover:scale-110 transition duration-300 cursor-pointer"
+                        onClick={() => window.open(img, "_blank")}
+                        onError={(e) => {
+                          // अगर इमेज नहीं मिली तो उसे छिपा दो और ग्रेडिएंट दिखाओ
+                          e.target.style.display = "none";
+                          e.target.nextSibling.style.display = "block";
+                        }}
+                      />
+                    ) : null}
+                    <div
+                      className={`w-full h-full bg-gradient-to-br ${color} opacity-50`}
+                      style={{ display: img ? "none" : "block" }}
+                    ></div>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* Right Side - Details */}
             <div>
               <p className="text-sm text-blue-400 font-semibold mb-3">
                 {template.tech_stack || "Next.js + Tailwind"}
@@ -179,7 +201,7 @@ export default function TemplateDetail() {
                     href={template.demo_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block text-center w-full mt-3 border border-gray-700 hover:border-blue-500 py-3.5 rounded-lg font-semibold transition"
+                    className="block text-center w-full mt-3 border border-gray-700 hover:border-blue-500 hover:bg-blue-500/10 py-3.5 rounded-lg font-semibold transition"
                   >
                     Live Preview
                   </a>
